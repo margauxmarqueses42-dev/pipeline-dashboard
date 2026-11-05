@@ -1,12 +1,12 @@
 const detections = [
-  { position: 0.14, type: "U", name: "Uniform", severity: "Low", confidence: 96, time: "14:02:18" },
-  { position: 0.37, type: "P", name: "Pitting", severity: "Medium", confidence: 94, time: "14:06:42" },
-  { position: 0.60, type: "G", name: "Galvanic", severity: "High", confidence: 93, time: "14:11:07" },
-  { position: 0.78, type: "U", name: "Uniform", severity: "Low", confidence: 97, time: "14:15:33" },
-  { position: 1.03, type: "P", name: "Pitting", severity: "Medium", confidence: 91, time: "14:20:51" },
-  { position: 1.31, type: "G", name: "Galvanic", severity: "High", confidence: 94, time: "14:25:16" },
-  { position: 1.60, type: "U", name: "Uniform", severity: "Low", confidence: 95, time: "14:29:40" },
-  { position: 1.83, type: "P", name: "Pitting", severity: "Medium", confidence: 93, time: "14:32:08" }
+  { position: 0.14, angle: 0.7, type: "U", name: "Uniform", severity: "Low", confidence: 96, time: "14:02:18" },
+  { position: 0.37, angle: 0.9, type: "P", name: "Pitting", severity: "Medium", confidence: 94, time: "14:06:42" },
+  { position: 0.60, angle: 0.55, type: "G", name: "Galvanic", severity: "High", confidence: 93, time: "14:11:07" },
+  { position: 0.78, angle: 1.05, type: "U", name: "Uniform", severity: "Low", confidence: 97, time: "14:15:33" },
+  { position: 1.03, angle: 0.62, type: "P", name: "Pitting", severity: "Medium", confidence: 91, time: "14:20:51" },
+  { position: 1.31, angle: 0.98, type: "G", name: "Galvanic", severity: "High", confidence: 94, time: "14:25:16" },
+  { position: 1.60, angle: 0.78, type: "U", name: "Uniform", severity: "Low", confidence: 95, time: "14:29:40" },
+  { position: 1.83, angle: 1.12, type: "P", name: "Pitting", severity: "Medium", confidence: 93, time: "14:32:08" }
 ];
 
 const PIPELINE_LENGTH_METERS = 2.032;
@@ -27,7 +27,7 @@ const scanImageUrls = new Map();
 
 const typeClass = { U: "type-u", P: "type-p", G: "type-g" };
 const severityClass = { Low: "severity-low", Medium: "severity-medium", High: "severity-high" };
-const severityColor = { Low: 0x45be7a, Medium: 0xebba40, High: 0xe75b52 };
+const thermalSeverity = { Low: 0.48, Medium: 0.76, High: 1 };
 const activeScenes = new Map();
 
 function showApp() {
@@ -36,7 +36,7 @@ function showApp() {
   setProfileName(
     sessionStorage.getItem("current-demo-display-name") ||
     sessionStorage.getItem("current-demo-username") ||
-    "ECE 4"
+    "Pipe-bot"
   );
 }
 
@@ -63,7 +63,11 @@ function saveDemoAccount(account) {
   if (accounts.some((savedAccount) => savedAccount.username.toLowerCase() === account.username.toLowerCase())) {
     throw new Error("An account already exists for that username.");
   }
-  localStorage.setItem("current-demo-accounts", JSON.stringify([...accounts, account]));
+  const updatedAccounts = JSON.stringify([...accounts, account]);
+  localStorage.setItem("current-demo-accounts", updatedAccounts);
+  if (localStorage.getItem("current-demo-accounts") !== updatedAccounts) {
+    throw new Error("The new account could not be verified in browser storage.");
+  }
 }
 
 async function hashDemoPassword(password, salt) {
@@ -454,31 +458,25 @@ function initializeScene(containerId) {
   const modelLength = PIPELINE_LENGTH_METERS * PIPE_RENDER_SCALE;
   const innerRadius = PIPE_INNER_DIAMETER_METERS / 2 * PIPE_RENDER_SCALE;
   const outerRadius = innerRadius + PIPE_WALL_THICKNESS_METERS * PIPE_RENDER_SCALE;
-  const pipeMaterial = new THREE.MeshStandardMaterial({ color: 0x84938b, metalness: 0.82, roughness: 0.31 });
-  const pipe = new THREE.Mesh(new THREE.CylinderGeometry(outerRadius, outerRadius, modelLength, 72, 1, true), pipeMaterial);
+  const outerGeometry = new THREE.CylinderGeometry(outerRadius, outerRadius, modelLength, 96, 220, true);
+  const pipeMaterial = createThermalPipeMaterial(THREE, outerGeometry, detections, modelLength);
+  const pipe = new THREE.Mesh(outerGeometry, pipeMaterial);
   pipe.rotation.z = Math.PI / 2;
   assembly.add(pipe);
 
-  const innerMaterial = new THREE.MeshStandardMaterial({ color: 0x596960, metalness: 0.83, roughness: 0.29, side: THREE.BackSide });
-  const innerWall = new THREE.Mesh(new THREE.CylinderGeometry(innerRadius, innerRadius, modelLength, 72, 1, true), innerMaterial);
+  const innerGeometry = new THREE.CylinderGeometry(innerRadius, innerRadius, modelLength, 96, 220, true);
+  const innerMaterial = createThermalPipeMaterial(THREE, innerGeometry, detections, modelLength, THREE.BackSide);
+  const innerWall = new THREE.Mesh(innerGeometry, innerMaterial);
   innerWall.rotation.z = Math.PI / 2;
   assembly.add(innerWall);
 
   const innerRimMaterial = new THREE.MeshStandardMaterial({ color: 0xa5b0aa, metalness: 0.88, roughness: 0.24, side: THREE.DoubleSide });
-  const ringMaterial = new THREE.MeshStandardMaterial({ color: 0x596960, metalness: 0.83, roughness: 0.29 });
   [-modelLength / 2, modelLength / 2].forEach((x) => {
     const rim = new THREE.Mesh(new THREE.RingGeometry(innerRadius, outerRadius, 72), innerRimMaterial);
     rim.position.x = x;
     rim.rotation.y = Math.PI / 2;
     assembly.add(rim);
   });
-  [-modelLength / 3, 0, modelLength / 3].forEach((x) => {
-    const ring = new THREE.Mesh(new THREE.TorusGeometry(outerRadius, 0.009, 8, 72), ringMaterial);
-    ring.position.x = x;
-    ring.rotation.y = Math.PI / 2;
-    assembly.add(ring);
-  });
-
   const seam = new THREE.Mesh(
     new THREE.CylinderGeometry(0.006, 0.006, modelLength * 0.995, 6),
     new THREE.MeshStandardMaterial({ color: 0xc3cec6, metalness: 0.7, roughness: 0.35 })
@@ -486,12 +484,6 @@ function initializeScene(containerId) {
   seam.rotation.z = Math.PI / 2;
   seam.position.z = outerRadius * 0.99;
   assembly.add(seam);
-
-  detections.forEach((event) => {
-    const x = (event.position / PIPELINE_LENGTH_METERS) * (modelLength * 0.92) - modelLength * 0.46;
-    const angle = 0.52 + (event.position % 1) * 0.55;
-    assembly.add(createSurfaceMarker(event.type, severityColor[event.severity], x, angle, outerRadius + 0.002));
-  });
 
   const grid = new THREE.GridHelper(11, 22, 0x496052, 0x33433a);
   grid.position.y = -1.28;
@@ -546,71 +538,50 @@ function initializeScene(containerId) {
   wireSceneControls(containerId, state);
 }
 
-function createSurfaceMarker(letter, color, x, angle, radius) {
-  const THREE = window.THREE;
-  const canvas = document.createElement("canvas");
-  canvas.width = 128;
-  canvas.height = 128;
-  const context = canvas.getContext("2d");
-  context.beginPath();
-  context.arc(64, 64, 57, 0, Math.PI * 2);
-  context.fillStyle = `#${color.toString(16).padStart(6, "0")}`;
-  context.fill();
-  context.lineWidth = 5;
-  context.strokeStyle = "#f4f7f3";
-  context.stroke();
-  context.fillStyle = "#17231e";
-  context.font = "700 62px Arial";
-  context.textAlign = "center";
-  context.textBaseline = "middle";
-  context.fillText(letter, 64, 66);
+function createThermalPipeMaterial(THREE, geometry, events, modelLength, side = THREE.FrontSide) {
+  const stops = [
+    { value: 0, color: new THREE.Color(0x102f8a) },
+    { value: 0.2, color: new THREE.Color(0x0878e8) },
+    { value: 0.4, color: new THREE.Color(0x00c5d8) },
+    { value: 0.58, color: new THREE.Color(0x24d36b) },
+    { value: 0.74, color: new THREE.Color(0xf2e900) },
+    { value: 0.88, color: new THREE.Color(0xff8100) },
+    { value: 1, color: new THREE.Color(0xe52521) }
+  ];
+  const positions = geometry.getAttribute("position");
+  const colors = new Float32Array(positions.count * 3);
+  const color = new THREE.Color();
+  const lengthSpread = 0.075;
+  const angleSpread = 0.24;
+  for (let index = 0; index < positions.count; index += 1) {
+    const longitudinalPosition = (positions.getY(index) + modelLength / 2) / modelLength;
+    const surfaceAngle = Math.atan2(positions.getZ(index), positions.getX(index));
+    let heat = 0.12;
+    events.forEach((event) => {
+      const eventPosition = event.position / PIPELINE_LENGTH_METERS;
+      const lengthDistance = longitudinalPosition - eventPosition;
+      const angleDistance = Math.atan2(
+        Math.sin(surfaceAngle - event.angle),
+        Math.cos(surfaceAngle - event.angle)
+      );
+      const heatDistance = (lengthDistance * lengthDistance) / (lengthSpread * lengthSpread) +
+        (angleDistance * angleDistance) / (angleSpread * angleSpread);
+      const influence = thermalSeverity[event.severity] * Math.exp(-0.5 * heatDistance);
+      heat = Math.max(heat, influence);
+    });
 
-  const texture = new window.THREE.CanvasTexture(canvas);
-  texture.encoding = window.THREE.sRGBEncoding;
-  texture.anisotropy = 4;
-
-  const halfLength = 0.04 * PIPE_RENDER_SCALE;
-  const halfAngle = 0.19;
-  const segments = 48;
-  const vertices = [x, Math.sin(angle) * radius, Math.cos(angle) * radius];
-  const uvs = [0.5, 0.5];
-  const indices = [];
-
-  for (let index = 0; index < segments; index += 1) {
-    const pointAngle = (index / segments) * Math.PI * 2;
-    const offsetX = Math.cos(pointAngle) * halfLength;
-    const offsetAngle = Math.sin(pointAngle) * halfAngle;
-    const surfaceAngle = angle + offsetAngle;
-    vertices.push(
-      x + offsetX,
-      Math.sin(surfaceAngle) * radius,
-      Math.cos(surfaceAngle) * radius
-    );
-    uvs.push(
-      0.5 + 0.5 * Math.cos(pointAngle),
-      0.5 - 0.5 * Math.sin(pointAngle)
-    );
+    let stopIndex = stops.findIndex((stop) => stop.value >= heat);
+    if (stopIndex <= 0) {
+      color.copy(stops[0].color);
+    } else {
+      const lower = stops[stopIndex - 1];
+      const upper = stops[stopIndex];
+      color.copy(lower.color).lerp(upper.color, (heat - lower.value) / (upper.value - lower.value));
+    }
+    color.toArray(colors, index * 3);
   }
-
-  for (let index = 0; index < segments; index += 1) {
-    indices.push(0, index + 1, ((index + 1) % segments) + 1);
-  }
-
-  const geometry = new THREE.BufferGeometry();
-  geometry.setAttribute("position", new THREE.Float32BufferAttribute(vertices, 3));
-  geometry.setAttribute("uv", new THREE.Float32BufferAttribute(uvs, 2));
-  geometry.setIndex(indices);
-  geometry.computeVertexNormals();
-
-  const material = new THREE.MeshStandardMaterial({
-    map: texture,
-    side: THREE.DoubleSide,
-    metalness: 0.08,
-    roughness: 0.82
-  });
-  const patch = new THREE.Mesh(geometry, material);
-  patch.renderOrder = 2;
-  return patch;
+  geometry.setAttribute("color", new THREE.BufferAttribute(colors, 3));
+  return new THREE.MeshStandardMaterial({ vertexColors: true, metalness: 0.25, roughness: 0.55, side });
 }
 
 function showSceneFallback(container) {
@@ -948,7 +919,7 @@ function initializeReports() {
   document.getElementById("printReport").addEventListener("click", () => window.print());
   document.getElementById("downloadReport").addEventListener("click", () => {
     const summary = [
-      "ECE 4 — PIPELINE INSPECTION SUMMARY",
+      "PIPE-BOT — PIPELINE INSPECTION SUMMARY",
       `${report.title} | Inspection ${report.inspectionId}`,
       `${report.date} | ${report.rover}`,
       "",

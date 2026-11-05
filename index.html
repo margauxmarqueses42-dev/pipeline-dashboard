@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="theme-color" content="#8c52ff">
-  <title>ECE 4 — Pipeline Inspection Dashboard</title>
+  <title>Pipe-bot — Pipeline Inspection Dashboard</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -15,7 +15,7 @@
 <body>
   <div class="login-screen" id="loginScreen">
     <div class="login-card">
-      <h1>Sign in to ECE 4</h1>
+      <h1>Sign in to Pipe-bot</h1>
       <p class="login-copy">Access the pipeline inspection dashboard</p>
       <form id="loginForm">
         <label for="loginUsername">Username</label>
@@ -28,8 +28,8 @@
       <button class="button create-account-button" id="openSignupButton" type="button">Create an account</button>
       <div class="auth-divider"><span>or</span></div>
       <div class="auth-social-buttons">
-        <button class="button auth-social-button" type="button" data-auth-provider="Google">Continue with Google</button>
-        <button class="button auth-social-button" type="button" data-auth-provider="Facebook">Continue with Facebook</button>
+        <button class="button auth-social-button" type="button" data-auth-provider="Google">Continue with Google <svg class="provider-logo google-logo" viewBox="0 0 48 48" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.27 5.48-4.78 7.18l7.73 6C44.4 37.99 46.98 31.9 46.98 24.55z"/><path fill="#FBBC05" d="M10.53 28.59A14.4 14.4 0 0 1 9.75 24c0-1.59.27-3.13.76-4.59l-7.98-6.19A23.9 23.9 0 0 0 0 24c0 3.88.93 7.55 2.56 10.78z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.9-5.8l-7.73-6c-2.14 1.45-4.89 2.3-8.17 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg></button>
+        <button class="button auth-social-button" type="button" data-auth-provider="Facebook">Continue with Facebook <svg class="provider-logo facebook-logo" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="12" fill="#1877F2"/><path fill="#fff" d="M13.55 20v-7.3H16l.37-2.85h-2.82V8.03c0-.83.23-1.4 1.41-1.4h1.5V4.08c-.26-.04-1.16-.11-2.2-.11-2.18 0-3.67 1.33-3.67 3.77v2.1H8.12v2.85h2.47V20z"/></svg></button>
       </div>
       <p class="auth-disclaimer">Your account is saved in this browser, so you can log in again later without signing up again. This demo is not server-secured and does not sync accounts to other browsers or devices. Don't use a reused or sensitive password.</p>
     </div>
@@ -39,8 +39,8 @@
       <h2 id="signupTitle">Create your account</h2>
       <p class="auth-dialog-copy">Sign up with a provider or choose a username and password.</p>
       <div class="auth-social-buttons signup-social-buttons">
-        <button class="button signup-social-button" type="button" data-auth-provider="Google">Sign up with Google</button>
-        <button class="button signup-social-button" type="button" data-auth-provider="Facebook">Sign up with Facebook</button>
+        <button class="button signup-social-button" type="button" data-auth-provider="Google">Sign up with Google <svg class="provider-logo google-logo" viewBox="0 0 48 48" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.27 5.48-4.78 7.18l7.73 6C44.4 37.99 46.98 31.9 46.98 24.55z"/><path fill="#FBBC05" d="M10.53 28.59A14.4 14.4 0 0 1 9.75 24c0-1.59.27-3.13.76-4.59l-7.98-6.19A23.9 23.9 0 0 0 0 24c0 3.88.93 7.55 2.56 10.78z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.9-5.8l-7.73-6c-2.14 1.45-4.89 2.3-8.17 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg></button>
+        <button class="button signup-social-button" type="button" data-auth-provider="Facebook">Sign up with Facebook <svg class="provider-logo facebook-logo" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="12" fill="#1877F2"/><path fill="#fff" d="M13.55 20v-7.3H16l.37-2.85h-2.82V8.03c0-.83.23-1.4 1.41-1.4h1.5V4.08c-.26-.04-1.16-.11-2.2-.11-2.18 0-3.67 1.33-3.67 3.77v2.1H8.12v2.85h2.47V20z"/></svg></button>
       </div>
       <div class="auth-divider"><span>or sign up with username</span></div>
       <label for="signupUsername">Preferred username</label>
@@ -77,7 +77,7 @@
         <div class="profile-container">
           <button class="profile-trigger" id="profileMenuButton" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="profileDropdown">
             <span class="avatar" id="profileAvatar">ECE</span>
-            <span class="profile-name"><strong id="profileDisplayName">ECE 4</strong><small>Signed in</small></span>
+            <span class="profile-name"><strong id="profileDisplayName">Pipe-bot</strong><small>Signed in</small></span>
             <span class="profile-chevron">⌃</span>
           </button>
           <div class="profile-dropdown" id="profileDropdown" hidden>
@@ -91,7 +91,7 @@
 
     <main class="main-content">
       <header class="topbar">
-        <div class="breadcrumb"><span>ECE 4</span><span class="crumb-slash">/</span><strong id="breadcrumbCurrent">Scan data</strong></div>
+        <div class="breadcrumb"><span>Pipe-bot</span><span class="crumb-slash">/</span><strong id="breadcrumbCurrent">Scan data</strong></div>
         <div class="topbar-actions"><span class="last-sync"><span class="sync-dot"></span> Scan data uploaded</span><button class="top-avatar" id="topProfileButton" type="button" aria-label="Open profile menu"><span class="avatar" id="topProfileAvatar">ECE</span></button></div>
       </header>
 
@@ -118,7 +118,7 @@
 
         <section class="view-panel" id="view-pipeline">
           <div class="page-heading"><div><div class="eyebrow">INSPECTION / 3D MODEL</div><h1>Pipeline Visualization Map</h1><p class="page-subtitle">Explore the modeled pipe interior and review detections by location.</p></div><span class="sample-tag heading-sample">DIMENSIONED MODEL</span></div>
-          <div class="pipeline-card large-pipeline"><div class="pipeline-toolbar"><div class="pipe-title"><span class="pipe-live-dot"></span><strong>Pipeline inspection</strong><span class="pipe-distance">2.032 m length · 8 in inner diameter</span></div><div class="view-controls"><span class="drag-hint">DRAG TO ROTATE</span><button class="view-control" id="resetViewLarge" title="Reset 3D view" aria-label="Reset 3D view">⟳</button></div></div><div class="pipeline-stage large-stage"><div id="pipeline3dLarge" class="pipeline-3d" role="img" aria-label="Interactive three-dimensional hollow pipeline showing sample corrosion detections"></div><div class="pipeline-loading">Loading 3D pipeline…</div><div class="pipeline-overlay"><span>ROTATE <kbd>DRAG</kbd></span><span>ZOOM <kbd>SCROLL</kbd></span></div></div><div class="pipeline-specs"><div><span>INNER DIAMETER</span><strong>8 in <small>(203.2 mm)</small></strong></div><div><span>WALL THICKNESS</span><strong>Schedule 20 <small>(6.35 mm)</small></strong></div><div><span>MODEL LENGTH</span><strong>2.032 m</strong></div></div><div class="pipeline-legend"><span class="legend-label">CORROSION TYPE</span><span class="legend-item"><i class="legend-letter">U</i> Uniform</span><span class="legend-item"><i class="legend-letter">P</i> Pitting</span><span class="legend-item"><i class="legend-letter">G</i> Galvanic</span><span class="legend-item"><i class="legend-letter non-corroded-letter">N</i> Non-corroded</span><span class="legend-separator"></span><span class="legend-label">SEVERITY</span><span class="severity-key"><i class="sev-dot sev-low"></i> Low</span><span class="severity-key"><i class="sev-dot sev-medium"></i> Medium</span><span class="severity-key"><i class="sev-dot sev-high"></i> High</span></div></div>
+          <div class="pipeline-card large-pipeline"><div class="pipeline-toolbar"><div class="pipe-title"><span class="pipe-live-dot"></span><strong>Pipeline inspection</strong><span class="pipe-distance">2.032 m length · 8 in inner diameter</span></div><div class="view-controls"><span class="drag-hint">DRAG TO ROTATE</span><button class="view-control" id="resetViewLarge" title="Reset 3D view" aria-label="Reset 3D view">⟳</button></div></div><div class="pipeline-stage large-stage"><div id="pipeline3dLarge" class="pipeline-3d" role="img" aria-label="Interactive three-dimensional pipeline showing severity as localized thermal heat spread across the pipe surface, with no letter markers"></div><div class="pipeline-loading">Loading 3D pipeline…</div><div class="pipeline-overlay"><span>ROTATE <kbd>DRAG</kbd></span><span>ZOOM <kbd>SCROLL</kbd></span></div></div><div class="pipeline-specs"><div><span>INNER DIAMETER</span><strong>8 in <small>(203.2 mm)</small></strong></div><div><span>WALL THICKNESS</span><strong>Schedule 20 <small>(6.35 mm)</small></strong></div><div><span>MODEL LENGTH</span><strong>2.032 m</strong></div></div><div class="pipeline-legend"><span class="legend-label">TYPE / SEVERITY</span><span class="legend-type-severity"><strong>U</strong> Uniform <span>Low</span></span><span class="legend-type-severity"><strong>P</strong> Pitting <span>Medium</span></span><span class="legend-type-severity"><strong>G</strong> Galvanic <span>High</span></span><span class="legend-separator"></span><span class="legend-label">THERMAL SEVERITY</span><span class="thermal-scale"><span>LOW</span><i></i><span>HIGH</span></span></div></div>
         </section>
 
         <section class="view-panel" id="view-history">
@@ -136,7 +136,7 @@
 
         <section class="view-panel" id="view-reports">
           <div class="page-heading"><div><div class="eyebrow">INSPECTION / DOCUMENTATION</div><h1>Inspection reports</h1></div><button class="button button-dark" id="editReportButton" type="button">Edit report</button></div>
-          <article class="report-preview"><div class="report-preview-top"><div class="report-symbol">ECE 4</div><span class="report-label">INSPECTION SUMMARY <span>·</span> DRAFT</span></div><div class="report-content"><div class="eyebrow">PIPELINE INSPECTION</div><h2 id="reportTitle">Pipeline Inspection</h2><p class="report-meta">Inspection <span id="reportInspectionId">#IN-2408</span> <span>·</span> <span id="reportDate">October 26, 2026</span> <span>·</span> <span id="reportRover">Rover R-07</span></p><div class="report-rule"></div><p class="report-paragraph" id="reportSummary">A 2.032 m sample inspection of an 8-inch inner diameter Schedule 20 pipe identified 8 corrosion events. Three uniform corrosion, three pitting, and two galvanic corrosion detections were classified, with an average model confidence of 94%.</p><div class="report-stats"><div><strong>08</strong><span>DETECTIONS</span></div><div><strong>03</strong><span>HIGH PRIORITY</span></div><div><strong>94<span>%</span></strong><span>AVG. CONFIDENCE</span></div><div><strong>2.032<span>m</span></strong><span>INSPECTED</span></div></div><p class="report-disclaimer">Illustrative demo report. Inspection results and corrosion locations must be verified against live field data.</p></div><div class="report-actions"><button class="button button-dark" id="printReport" type="button"><span class="button-plus">↗</span> Print / save PDF</button><button class="button button-outline" id="downloadReport" type="button">↓ Download summary</button></div></article>
+          <article class="report-preview"><div class="report-preview-top"><div class="report-symbol">Pipe-bot</div><span class="report-label">INSPECTION SUMMARY <span>·</span> DRAFT</span></div><div class="report-content"><div class="eyebrow">PIPELINE INSPECTION</div><h2 id="reportTitle">Pipeline Inspection</h2><p class="report-meta">Inspection <span id="reportInspectionId">#IN-2408</span> <span>·</span> <span id="reportDate">October 26, 2026</span> <span>·</span> <span id="reportRover">Rover R-07</span></p><div class="report-rule"></div><p class="report-paragraph" id="reportSummary">A 2.032 m sample inspection of an 8-inch inner diameter Schedule 20 pipe identified 8 corrosion events. Three uniform corrosion, three pitting, and two galvanic corrosion detections were classified, with an average model confidence of 94%.</p><div class="report-stats"><div><strong>08</strong><span>DETECTIONS</span></div><div><strong>03</strong><span>HIGH PRIORITY</span></div><div><strong>94<span>%</span></strong><span>AVG. CONFIDENCE</span></div><div><strong>2.032<span>m</span></strong><span>INSPECTED</span></div></div><p class="report-disclaimer">Illustrative demo report. Inspection results and corrosion locations must be verified against live field data.</p></div><div class="report-actions"><button class="button button-dark" id="printReport" type="button"><span class="button-plus">↗</span> Print / save PDF</button><button class="button button-outline" id="downloadReport" type="button">↓ Download summary</button></div></article>
         </section>
 
       </div>
