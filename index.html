@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#8c52ff">
+  <title>ECE 4 — Pipeline Inspection Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js" defer></script>
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <div class="login-screen" id="loginScreen">
+    <div class="login-card">
+      <h1>Sign in to ECE 4</h1>
+      <p class="login-copy">Access the pipeline inspection dashboard</p>
+      <form id="loginForm">
+        <label for="loginUsername">Username</label>
+        <input id="loginUsername" type="text" placeholder="Enter your username" autocomplete="username" required>
+        <label for="loginPassword">Password</label>
+        <input id="loginPassword" type="password" placeholder="Enter your password" autocomplete="current-password" required>
+        <p class="login-error" id="loginError" role="alert"></p>
+        <button class="button button-primary login-submit" type="submit">Login</button>
+      </form>
+    </div>
+  </div>
+
+  <div class="app-shell is-hidden" id="appShell">
+    <aside class="sidebar">
+      <a class="brand" href="#" aria-label="ECE 4 dashboard">
+        <span>ECE 4</span>
+      </a>
+      <div class="nav-label">INSPECTION</div>
+      <nav class="main-nav" aria-label="Main navigation">
+        <button class="nav-item active" data-view="scan-data"><span class="nav-icon">◷</span> Scan data <span class="nav-count">01</span></button>
+        <button class="nav-item" data-view="pipeline"><span class="nav-icon">◎</span> Pipeline map</button>
+        <button class="nav-item" data-view="history"><span class="nav-icon">≡</span> Detection log <span class="nav-badge">8</span></button>
+        <button class="nav-item" data-view="robot-status"><span class="nav-icon">◉</span> Robot status</button>
+        <button class="nav-item" data-view="reports"><span class="nav-icon">▤</span> Reports</button>
+      </nav>
+      <div class="nav-label nav-label-spaced">SYSTEM</div>
+      <nav class="main-nav" aria-label="System navigation">
+        <button class="nav-item" data-view="classification"><span class="nav-icon">✳</span> ML classification</button>
+      </nav>
+      <div class="sidebar-bottom">
+        <div class="profile-container">
+          <button class="profile-trigger" id="profileMenuButton" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="profileDropdown">
+            <span class="avatar" id="profileAvatar">ECE</span>
+            <span class="profile-name"><strong id="profileDisplayName">ECE 4</strong><small>Signed in</small></span>
+            <span class="profile-chevron">⌃</span>
+          </button>
+          <div class="profile-dropdown" id="profileDropdown" hidden>
+            <button type="button" id="editProfileButton">Edit profile / name</button>
+            <button type="button" id="logoutButton">Log out</button>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <main class="main-content">
+      <header class="topbar">
+        <div class="breadcrumb"><span>ECE 4</span><span class="crumb-slash">/</span><strong id="breadcrumbCurrent">Scan data</strong></div>
+        <div class="topbar-actions"><span class="last-sync"><span class="sync-dot"></span> Scan data uploaded</span><button class="top-avatar" id="topProfileButton" type="button" aria-label="Open profile menu">JD</button></div>
+      </header>
+
+      <div class="content-wrap">
+        <section class="view-panel active" id="view-scan-data">
+          <div class="page-heading">
+            <div><div class="eyebrow">INSPECTION / UPLOADED SENSOR DATA</div><h1>Scan data</h1><p class="page-subtitle">Review readings at each inspection point, in the order they were collected.</p></div>
+            <span class="upload-status"><i></i> DATA UPLOADED</span>
+          </div>
+          <div class="scan-banner">
+            <div class="scan-banner-copy"><span class="live-pill"><i></i> SCAN COMPLETE</span><h2>Pipeline inspection</h2><p>Inspection <span class="mono">#IN-2408</span><span class="meta-divider">·</span> 6.0 m scanned <span class="meta-divider">·</span> 12 in ductile iron</p></div>
+            <div class="scan-progress-wrap"><div class="scan-progress-top"><span>ROBOT STATUS</span><strong>Retrieved</strong></div><div class="progress-track"><span style="width:100%"></span></div><div class="progress-bottom"><span>Rover R-07</span><span>Uploaded <strong>14:35</strong></span></div></div>
+            <div class="scan-status"><span class="robot-icon">✓</span><span><strong>Data uploaded</strong><small>Ready for review</small></span><span class="status-pulse"></span></div>
+          </div>
+          <div class="section-title-row"><div><h2>Sensor readings by inspection point</h2><p>Readings are shown in collection order from start to end of the pipe.</p></div><span class="sample-tag">SAMPLE UPLOAD DATA</span></div>
+          <div class="table-card scan-readings-card"><div class="table-toolbar"><div class="table-title"><span class="uploaded-indicator"><i></i> 8 INSPECTION POINTS</span><span class="table-total">Oldest to newest</span></div></div><div class="table-scroll"><table><thead><tr><th>POINT</th><th>POSITION</th><th>RECORDED AT</th><th>ELECTROCHEMICAL</th><th>TEMPERATURE</th><th>pH</th></tr></thead><tbody id="scanReadingRows"></tbody></table></div><div class="table-foot"><span>Showing <strong>8</strong> sample readings</span></div></div>
+        </section>
+
+        <section class="view-panel" id="view-pipeline">
+          <div class="page-heading"><div><div class="eyebrow">INSPECTION / 3D MODEL</div><h1>Pipeline map</h1><p class="page-subtitle">Explore the pipe surface and review detected corrosion by location.</p></div><span class="sample-tag heading-sample">SAMPLE SCAN LAYOUT</span></div>
+          <div class="pipeline-card large-pipeline"><div class="pipeline-toolbar"><div class="pipe-title"><span class="pipe-live-dot"></span><strong>Pipeline inspection</strong><span class="pipe-distance">6.0 m inspected · 12 in ductile iron</span></div><div class="view-controls"><span class="drag-hint">DRAG TO ROTATE</span><button class="view-control" id="resetViewLarge" title="Reset 3D view" aria-label="Reset 3D view">⟳</button></div></div><div class="pipeline-stage large-stage"><div id="pipeline3dLarge" class="pipeline-3d" role="img" aria-label="Interactive three-dimensional pipeline showing sample corrosion detections"></div><div class="pipeline-loading">Loading 3D pipeline…</div><div class="pipeline-overlay"><span>ROTATE <kbd>DRAG</kbd></span><span>ZOOM <kbd>SCROLL</kbd></span></div></div><div class="pipeline-legend"><span class="legend-label">CORROSION TYPE</span><span class="legend-item"><i class="legend-letter">U</i> Uniform</span><span class="legend-item"><i class="legend-letter">P</i> Pitting</span><span class="legend-item"><i class="legend-letter">G</i> Galvanic</span><span class="legend-item"><i class="legend-letter non-corroded-letter">N</i> Non-corroded</span><span class="legend-separator"></span><span class="legend-label">SEVERITY</span><span class="severity-key"><i class="sev-dot sev-low"></i> Low</span><span class="severity-key"><i class="sev-dot sev-medium"></i> Medium</span><span class="severity-key"><i class="sev-dot sev-high"></i> High</span></div></div>
+        </section>
+
+        <section class="view-panel" id="view-history">
+          <div class="page-heading"><div><div class="eyebrow">INSPECTION / EVENT RECORD</div><h1>Detection log</h1><p class="page-subtitle">Every corrosion event recorded during the current scan.</p></div><button class="button button-dark" id="exportCsv"><span class="button-plus">↓</span> Export CSV</button></div>
+          <div class="table-card"><div class="table-toolbar"><div class="table-title"><span class="live-pill"><i></i> SCAN IN PROGRESS</span><span class="table-total">8 events</span></div><div class="table-filter"><span>⌕</span><input id="logSearch" type="search" placeholder="Search events..." aria-label="Search detection events"></div></div><div class="table-scroll"><table><thead><tr><th>POSITION</th><th>TYPE</th><th>SEVERITY</th><th>CONFIDENCE</th><th>DETECTED AT</th></tr></thead><tbody id="detectionRows"></tbody></table></div><div class="table-foot"><span>Showing <strong>8</strong> sample events</span></div></div>
+        </section>
+
+        <section class="view-panel" id="view-robot-status">
+          <div class="page-heading"><div><div class="eyebrow">ROBOT / STATUS</div><h1>Robot status</h1><p class="page-subtitle">Current position, power, connection, and inspection progress.</p></div><span class="online-tag"><i></i> CONNECTED</span></div>
+          <div class="robot-status-grid">
+            <article class="robot-status-card">
+              <div class="robot-status-card-heading"><span class="metric-icon">⌖</span><span class="online-tag"><i></i> POSITION</span></div>
+              <p class="robot-status-label">CURRENT POSITION</p>
+              <div class="robot-status-reading">6.0 <span>m</span></div>
+              <div class="robot-status-track" role="progressbar" aria-label="Robot position along pipe" aria-valuemin="0" aria-valuemax="6" aria-valuenow="6"><span style="width:100%"></span><i></i></div>
+              <div class="robot-status-range"><span>0.0 m</span><span>6.0 m</span></div>
+            </article>
+            <article class="robot-status-card">
+              <div class="robot-status-card-heading"><span class="metric-icon battery-icon">▰</span><span class="online-tag"><i></i> POWER NORMAL</span></div>
+              <p class="robot-status-label">BATTERY</p>
+              <div class="robot-status-reading">82<span>%</span></div>
+              <div class="robot-status-track" role="progressbar" aria-label="Battery charge" aria-valuemin="0" aria-valuemax="100" aria-valuenow="82"><span style="width:82%"></span></div>
+              <p class="robot-status-detail">Battery powered · Operating normally</p>
+            </article>
+            <article class="robot-status-card">
+              <div class="robot-status-card-heading"><span class="metric-icon">⌁</span><span class="online-tag"><i></i> ONLINE</span></div>
+              <p class="robot-status-label">CONNECTION</p>
+              <div class="robot-status-reading robot-status-text">Connected</div>
+              <p class="robot-status-detail">Rover R-07 is communicating with the dashboard.</p>
+            </article>
+            <article class="robot-status-card">
+              <div class="robot-status-card-heading"><span class="metric-icon">◷</span><span class="robot-status-state">COMPLETE</span></div>
+              <p class="robot-status-label">SCAN PROGRESS</p>
+              <div class="robot-status-reading">6.0 <span>/ 6.0 m</span></div>
+              <div class="robot-status-track" role="progressbar" aria-label="Scan progress" aria-valuemin="0" aria-valuemax="6" aria-valuenow="6"><span style="width:100%"></span></div>
+              <p class="robot-status-detail">Inspection scan complete</p>
+            </article>
+          </div>
+        </section>
+
+        <section class="view-panel" id="view-classification">
+          <div class="page-heading"><div><div class="eyebrow">INSPECTION / MODEL OUTPUT</div><h1>ML classification</h1><p class="page-subtitle">A closer look at the corrosion detected in this inspection.</p></div><span class="model-badge"><span>✳</span> MODEL V2.4.1</span></div>
+          <div class="classification-hero"><div><span class="live-pill"><i></i> UPLOADED INSPECTION</span><h2>8 <span>corrosion events classified</span></h2><p>Classifier completed on-device · Last inference 14:32:08</p></div><div class="confidence-score"><div class="confidence-ring"><span>94<small>%</small></span></div><span>AVG. CONFIDENCE</span></div></div>
+          <div class="section-title-row classification-title"><div><h2>Detections by type</h2><p>Classification breakdown and confidence</p></div></div>
+          <div class="classification-cards"><article class="class-card"><div class="class-card-top"><span class="type-indicator type-u">U</span><span class="severity-chip chip-low">LOW SEVERITY</span></div><h3>Uniform corrosion</h3><div class="class-count"><strong>03</strong><span>detections</span></div><div class="class-confidence"><span>Average confidence</span><strong>96.2%</strong></div><div class="confidence-track"><span style="width:96.2%"></span></div></article><article class="class-card"><div class="class-card-top"><span class="type-indicator type-p">P</span><span class="severity-chip chip-medium">MED SEVERITY</span></div><h3>Pitting corrosion</h3><div class="class-count"><strong>03</strong><span>detections</span></div><div class="class-confidence"><span>Average confidence</span><strong>92.8%</strong></div><div class="confidence-track confidence-yellow"><span style="width:92.8%"></span></div></article><article class="class-card"><div class="class-card-top"><span class="type-indicator type-g">G</span><span class="severity-chip chip-high">HIGH SEVERITY</span></div><h3>Galvanic corrosion</h3><div class="class-count"><strong>02</strong><span>detections</span></div><div class="class-confidence"><span>Average confidence</span><strong>93.4%</strong></div><div class="confidence-track confidence-red"><span style="width:93.4%"></span></div></article></div>
+          <div class="table-card severity-table"><div class="summary-heading"><div><h2>Severity distribution</h2><p>Across all classified detections</p></div></div><div class="severity-bars"><div><span>Low</span><div class="bar-track"><i class="bar-low" style="width:38%"></i></div><strong>3 <small>events</small></strong></div><div><span>Medium</span><div class="bar-track"><i class="bar-medium" style="width:38%"></i></div><strong>3 <small>events</small></strong></div><div><span>High</span><div class="bar-track"><i class="bar-high" style="width:25%"></i></div><strong>2 <small>events</small></strong></div></div></div>
+        </section>
+
+        <section class="view-panel" id="view-reports">
+          <div class="page-heading"><div><div class="eyebrow">INSPECTION / DOCUMENTATION</div><h1>Inspection reports</h1></div><button class="button button-dark" id="generateReport"><span class="button-plus">＋</span> Create report</button></div>
+          <article class="report-preview"><div class="report-preview-top"><div class="report-symbol">ECE 4</div><span class="report-label">INSPECTION SUMMARY <span>·</span> DRAFT</span></div><div class="report-content"><div class="eyebrow">PIPELINE INSPECTION</div><h2>Pipeline<br>Inspection</h2><p class="report-meta">Inspection #IN-2408 <span>·</span> October 26, 2026 <span>·</span> Rover R-07</p><div class="report-rule"></div><p class="report-paragraph">A 6.0 m sample inspection of a 12 in ductile iron pipeline identified 8 corrosion events. Three uniform corrosion, three pitting, and two galvanic corrosion detections were classified, with an average model confidence of 94%.</p><div class="report-stats"><div><strong>08</strong><span>DETECTIONS</span></div><div><strong>03</strong><span>HIGH PRIORITY</span></div><div><strong>94<span>%</span></strong><span>AVG. CONFIDENCE</span></div><div><strong>6.0<span>m</span></strong><span>INSPECTED</span></div></div><p class="report-disclaimer">Illustrative demo report. Inspection results and corrosion locations must be verified against live field data.</p></div><div class="report-actions"><button class="button button-dark" id="printReport"><span class="button-plus">↗</span> Print / save PDF</button><button class="button button-outline" id="downloadReport">↓ Download summary</button></div></article>
+        </section>
+
+      </div>
+    </main>
+    <dialog class="profile-dialog" id="profileDialog">
+      <form id="profileForm">
+        <h2>Edit profile</h2>
+        <label for="profileNameInput">Name</label>
+        <input id="profileNameInput" type="text" maxlength="60" required>
+        <p class="login-error" id="profileError" role="alert"></p>
+        <div class="profile-dialog-actions">
+          <button class="button button-outline" id="cancelProfileEdit" type="button">Cancel</button>
+          <button class="button button-dark" type="submit">Save name</button>
+        </div>
+      </form>
+    </dialog>
+  </div>
+</body>
+</html>
