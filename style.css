@@ -289,3 +289,15 @@ button { cursor: pointer; }
 .sidebar .brand { gap: 0; }
 @media (max-width: 780px) { .login-card { padding: 28px 22px; } }
 @media (max-width: 780px) { .sidebar .brand>span:last-child { font-size: 8px; letter-spacing: .3px; white-space: nowrap; } }
+
+.legend-letter { font-weight: 700; }
+.type-indicator { font-weight: 700; }
+.sev-low,.severity-low i,.bar-low { background: #00bf63; }
+.sev-medium,.severity-medium i,.bar-medium { background: #ffde59; }
+.sev-high,.severity-high i,.bar-high { background: #ff3131; }
+.severity-low,.legend-type-severity .severity-low { color: #00bf63; }
+.severity-medium,.legend-type-severity .severity-medium { color: #ffde59; }
+.severity-high,.legend-type-severity .severity-high { color: #ff3131; }
+.chip-low { color: #12452b; background: #00bf63; }
+.chip-medium { color: #443800; background: #ffde59; }
+.chip-high { color: #fff; background: #ff3131; }
