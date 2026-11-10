@@ -450,14 +450,14 @@ function initializeScene(containerId) {
   const innerRadius = PIPE_INNER_DIAMETER_METERS / 2 * PIPE_RENDER_SCALE;
   const outerRadius = innerRadius + PIPE_WALL_THICKNESS_METERS * PIPE_RENDER_SCALE;
   const outerGeometry = new THREE.CylinderGeometry(outerRadius, outerRadius, modelLength, 96, 220, true);
-  const pipeMaterial = new THREE.MeshStandardMaterial({ color: 0xa6a6a6, metalness: 0.25, roughness: 0.55 });
+  const pipeMaterial = new THREE.MeshStandardMaterial({ color: 0x545454, metalness: 0.25, roughness: 0.55 });
   const pipe = new THREE.Mesh(outerGeometry, pipeMaterial);
   pipe.rotation.z = Math.PI / 2;
   assembly.add(pipe);
 
   const innerGeometry = new THREE.CylinderGeometry(innerRadius, innerRadius, modelLength, 96, 220, true);
   const innerMaterial = new THREE.MeshStandardMaterial({
-    color: 0xa6a6a6,
+    color: 0x545454,
     metalness: 0.25,
     roughness: 0.55,
     side: THREE.BackSide
@@ -546,7 +546,8 @@ function addSeverityPatches(THREE, assembly, events, outerRadius, innerRadius, m
     if (color === undefined) return;
 
     [outerRadius + 0.004, innerRadius - 0.004].forEach((radius) => {
-      const positions = [radius * Math.cos(event.angle), (event.position / PIPELINE_LENGTH_METERS - 0.5) * modelLength, radius * Math.sin(event.angle)];
+      const eventLength = (event.position / PIPELINE_LENGTH_METERS - 0.5) * modelLength;
+      const positions = [radius * Math.cos(event.angle), eventLength, radius * Math.sin(event.angle)];
       const indices = [];
 
       for (let segment = 0; segment < segments; segment += 1) {
@@ -575,6 +576,36 @@ function addSeverityPatches(THREE, assembly, events, outerRadius, innerRadius, m
       patch.rotation.z = Math.PI / 2;
       assembly.add(patch);
     });
+
+    const canvas = document.createElement("canvas");
+    canvas.width = 128;
+    canvas.height = 128;
+    const context = canvas.getContext("2d");
+    if (!context) throw new Error("Could not draw a label for the 3D pipeline.");
+    context.font = "bold 88px Arial, sans-serif";
+    context.textAlign = "center";
+    context.textBaseline = "middle";
+    context.lineJoin = "round";
+    context.lineWidth = 12;
+    context.strokeStyle = "#252525";
+    context.fillStyle = "#ffffff";
+    context.strokeText(event.type, 64, 66);
+    context.fillText(event.type, 64, 66);
+
+    const texture = new THREE.CanvasTexture(canvas);
+    texture.encoding = THREE.sRGBEncoding;
+    const label = new THREE.Sprite(new THREE.SpriteMaterial({
+      map: texture,
+      transparent: true,
+      depthWrite: false
+    }));
+    label.position.set(
+      (outerRadius + 0.015) * Math.cos(event.angle),
+      eventLength,
+      (outerRadius + 0.015) * Math.sin(event.angle)
+    );
+    label.scale.set(0.17, 0.17, 1);
+    assembly.add(label);
   });
 }
 
