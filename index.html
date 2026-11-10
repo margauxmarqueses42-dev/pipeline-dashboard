@@ -26,23 +26,13 @@
         <button class="button button-primary login-submit" type="submit">Login</button>
       </form>
       <button class="button create-account-button" id="openSignupButton" type="button">Create an account</button>
-      <div class="auth-divider"><span>or</span></div>
-      <div class="auth-social-buttons">
-        <button class="button auth-social-button" type="button" data-auth-provider="Google">Continue with Google <svg class="provider-logo google-logo" viewBox="0 0 48 48" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.27 5.48-4.78 7.18l7.73 6C44.4 37.99 46.98 31.9 46.98 24.55z"/><path fill="#FBBC05" d="M10.53 28.59A14.4 14.4 0 0 1 9.75 24c0-1.59.27-3.13.76-4.59l-7.98-6.19A23.9 23.9 0 0 0 0 24c0 3.88.93 7.55 2.56 10.78z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.9-5.8l-7.73-6c-2.14 1.45-4.89 2.3-8.17 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg></button>
-        <button class="button auth-social-button" type="button" data-auth-provider="Facebook">Continue with Facebook <svg class="provider-logo facebook-logo" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="12" fill="#1877F2"/><path fill="#fff" d="M13.55 20v-7.3H16l.37-2.85h-2.82V8.03c0-.83.23-1.4 1.41-1.4h1.5V4.08c-.26-.04-1.16-.11-2.2-.11-2.18 0-3.67 1.33-3.67 3.77v2.1H8.12v2.85h2.47V20z"/></svg></button>
-      </div>
-      <p class="auth-disclaimer">Your account is saved in this browser, so you can log in again later without signing up again. This demo is not server-secured and does not sync accounts to other browsers or devices. Don't use a reused or sensitive password.</p>
+      <p class="auth-disclaimer">Your account is saved in this browser. Use the same username and password when you return; you don't need to create another account. Accounts do not sync to other browsers or devices.</p>
     </div>
   </div>
   <dialog class="auth-dialog" id="signupDialog" aria-labelledby="signupTitle">
     <form id="signupForm">
       <h2 id="signupTitle">Create your account</h2>
-      <p class="auth-dialog-copy">Sign up with a provider or choose a username and password.</p>
-      <div class="auth-social-buttons signup-social-buttons">
-        <button class="button signup-social-button" type="button" data-auth-provider="Google">Sign up with Google <svg class="provider-logo google-logo" viewBox="0 0 48 48" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.27 5.48-4.78 7.18l7.73 6C44.4 37.99 46.98 31.9 46.98 24.55z"/><path fill="#FBBC05" d="M10.53 28.59A14.4 14.4 0 0 1 9.75 24c0-1.59.27-3.13.76-4.59l-7.98-6.19A23.9 23.9 0 0 0 0 24c0 3.88.93 7.55 2.56 10.78z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.9-5.8l-7.73-6c-2.14 1.45-4.89 2.3-8.17 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg></button>
-        <button class="button signup-social-button" type="button" data-auth-provider="Facebook">Sign up with Facebook <svg class="provider-logo facebook-logo" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="12" fill="#1877F2"/><path fill="#fff" d="M13.55 20v-7.3H16l.37-2.85h-2.82V8.03c0-.83.23-1.4 1.41-1.4h1.5V4.08c-.26-.04-1.16-.11-2.2-.11-2.18 0-3.67 1.33-3.67 3.77v2.1H8.12v2.85h2.47V20z"/></svg></button>
-      </div>
-      <div class="auth-divider"><span>or sign up with username</span></div>
+      <p class="auth-dialog-copy">Choose a username and password. Your account will be saved in this browser.</p>
       <label for="signupUsername">Preferred username</label>
       <input id="signupUsername" type="text" placeholder="Choose a username" autocomplete="username" minlength="3" maxlength="30" pattern="[A-Za-z0-9._-]{3,30}" title="Use 3–30 letters, numbers, dots, underscores, or hyphens." required>
       <label for="signupPassword">Password</label>

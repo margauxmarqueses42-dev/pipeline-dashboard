@@ -259,21 +259,11 @@ button { cursor: pointer; }
 .auth-dialog label { margin-bottom: 7px; color: #46534b; font-size: 12px; font-weight: 500; }
 .auth-dialog input { height: 41px; margin-bottom: 15px; padding: 0 11px; border: 1px solid #dfe6ed; border-radius: 5px; outline: 0; }
 .auth-dialog input:focus { border-color: #57c99b; box-shadow: 0 0 0 3px #dff4e9; }
-.auth-dialog .auth-divider { margin: 18px 0; color: #78867e; }
 .auth-dialog-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 13px; }
 .create-account-button { width: 100%; margin-top: 11px; border: 1px solid rgba(223,242,255,.62); color: #fff; background: transparent; }
-.create-account-button:hover,.auth-social-button:hover { background: rgba(255,255,255,.12); }
-.auth-divider { display: flex; align-items: center; gap: 10px; margin: 19px 0 13px; color: rgba(239,248,255,.78); font-size: 10px; }
-.auth-divider::before,.auth-divider::after { flex: 1; height: 1px; content: ""; background: currentColor; opacity: .35; }
-.auth-social-buttons { display: grid; gap: 9px; }
-.auth-social-button { width: 100%; min-height: 40px; border: 1px solid rgba(223,242,255,.62); color: #fff; background: transparent; }
-.provider-logo { width: 17px; height: 17px; flex: 0 0 auto; vertical-align: middle; }
+.create-account-button:hover { background: rgba(255,255,255,.12); }
 .auth-disclaimer { margin: 17px 0 0; color: rgba(239,248,255,.72); font-size: 10px; line-height: 1.5; text-align: center; }
-.signup-social-buttons { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-.signup-social-button { border: 1px solid #dfe6ed; color: #27372e; background: #fff; font-size: 10px; }
-.signup-social-button:hover { background: #f3f7f4; }
 .auth-dialog .login-error { color: #be4c43; }
-.auth-dialog .auth-divider { color: #78867e; }
 .auth-dialog-actions button:disabled,.login-submit:disabled { cursor: wait; opacity: .65; }
 .thermal-scale { display: inline-flex; align-items: center; gap: 5px; color: #728078; font: 8px var(--mono); white-space: nowrap; }
 .thermal-scale i { width: 76px; height: 8px; border-radius: 5px; background: linear-gradient(90deg,#102f8a 0%,#0878e8 20%,#00c5d8 40%,#24d36b 58%,#f2e900 74%,#ff8100 88%,#e52521 100%); }

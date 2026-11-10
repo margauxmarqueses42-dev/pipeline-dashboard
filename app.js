@@ -197,14 +197,6 @@ function initializeLogin() {
     }
   });
 
-  document.querySelectorAll("[data-auth-provider]").forEach((button) => {
-    button.addEventListener("click", () => {
-      const message = `${button.dataset.authProvider} sign-in is not configured for this demo. Provider OAuth credentials and a server-side authentication flow are required.`;
-      const target = button.closest(".auth-dialog") ? signupError : error;
-      target.textContent = message;
-    });
-  });
-
   document.getElementById("logoutButton").addEventListener("click", () => {
     sessionStorage.removeItem("current-demo-session");
     sessionStorage.removeItem("current-demo-username");
