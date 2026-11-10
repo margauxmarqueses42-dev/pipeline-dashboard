@@ -450,14 +450,16 @@ function initializeScene(containerId) {
   const innerRadius = PIPE_INNER_DIAMETER_METERS / 2 * PIPE_RENDER_SCALE;
   const outerRadius = innerRadius + PIPE_WALL_THICKNESS_METERS * PIPE_RENDER_SCALE;
   const outerGeometry = new THREE.CylinderGeometry(outerRadius, outerRadius, modelLength, 96, 220, true);
-  const pipeMaterial = new THREE.MeshBasicMaterial({ color: 0x545454 });
+  const pipeMaterial = new THREE.MeshStandardMaterial({ color: 0x545454, metalness: 0.25, roughness: 0.55 });
   const pipe = new THREE.Mesh(outerGeometry, pipeMaterial);
   pipe.rotation.z = Math.PI / 2;
   assembly.add(pipe);
 
   const innerGeometry = new THREE.CylinderGeometry(innerRadius, innerRadius, modelLength, 96, 220, true);
-  const innerMaterial = new THREE.MeshBasicMaterial({
+  const innerMaterial = new THREE.MeshStandardMaterial({
     color: 0x545454,
+    metalness: 0.25,
+    roughness: 0.55,
     side: THREE.BackSide
   });
   const innerWall = new THREE.Mesh(innerGeometry, innerMaterial);
@@ -535,25 +537,23 @@ function initializeScene(containerId) {
 
 function addSeverityPatches(THREE, assembly, events, outerRadius, innerRadius, modelLength) {
   const severityColors = { Low: 0x00bf63, Medium: 0xffde59, High: 0xff3131 };
-  const lengthRadius = modelLength * 0.025;
-  const angleRadius = 0.2;
+  const lengthRadius = modelLength * 0.02;
+  const angleRadius = 0.18;
   const segments = 48;
 
   events.forEach((event) => {
     const color = severityColors[event.severity];
     if (color === undefined) return;
 
-    [outerRadius + 0.004, innerRadius - 0.004].forEach((radius) => {
-      const eventLength = (event.position / PIPELINE_LENGTH_METERS - 0.5) * modelLength;
+    const eventLength = (event.position / PIPELINE_LENGTH_METERS - 0.5) * modelLength;
+    [outerRadius + 0.01, innerRadius - 0.01].forEach((radius) => {
       const positions = [radius * Math.cos(event.angle), eventLength, radius * Math.sin(event.angle)];
       const indices = [];
 
       for (let segment = 0; segment < segments; segment += 1) {
         const angle = (segment / segments) * Math.PI * 2;
         const surfaceAngle = event.angle + Math.cos(angle) * angleRadius;
-        const longitudinalPosition =
-          (event.position / PIPELINE_LENGTH_METERS - 0.5) * modelLength +
-          Math.sin(angle) * lengthRadius;
+        const longitudinalPosition = eventLength + Math.sin(angle) * lengthRadius;
         positions.push(
           radius * Math.cos(surfaceAngle),
           longitudinalPosition,
@@ -569,7 +569,13 @@ function addSeverityPatches(THREE, assembly, events, outerRadius, innerRadius, m
 
       const patch = new THREE.Mesh(
         geometry,
-        new THREE.MeshBasicMaterial({ color, side: THREE.DoubleSide })
+        new THREE.MeshBasicMaterial({
+          color,
+          side: THREE.DoubleSide,
+          polygonOffset: true,
+          polygonOffsetFactor: -1,
+          polygonOffsetUnits: -1
+        })
       );
       patch.rotation.z = Math.PI / 2;
       assembly.add(patch);
@@ -598,9 +604,9 @@ function addSeverityPatches(THREE, assembly, events, outerRadius, innerRadius, m
       depthWrite: false
     }));
     label.position.set(
-      (outerRadius + 0.015) * Math.cos(event.angle),
+      (outerRadius + 0.02) * Math.cos(event.angle),
       eventLength,
-      (outerRadius + 0.015) * Math.sin(event.angle)
+      (outerRadius + 0.02) * Math.sin(event.angle)
     );
     label.scale.set(0.17, 0.17, 1);
     assembly.add(label);
