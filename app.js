@@ -27,7 +27,6 @@ const scanImageUrls = new Map();
 
 const typeClass = { U: "type-u", P: "type-p", G: "type-g" };
 const severityClass = { Low: "severity-low", Medium: "severity-medium", High: "severity-high" };
-const thermalSeverity = { Low: 0.48, Medium: 0.76, High: 1 };
 const activeScenes = new Map();
 
 function showApp() {
@@ -451,16 +450,22 @@ function initializeScene(containerId) {
   const innerRadius = PIPE_INNER_DIAMETER_METERS / 2 * PIPE_RENDER_SCALE;
   const outerRadius = innerRadius + PIPE_WALL_THICKNESS_METERS * PIPE_RENDER_SCALE;
   const outerGeometry = new THREE.CylinderGeometry(outerRadius, outerRadius, modelLength, 96, 220, true);
-  const pipeMaterial = createThermalPipeMaterial(THREE, outerGeometry, detections, modelLength);
+  const pipeMaterial = new THREE.MeshStandardMaterial({ color: 0xa6a6a6, metalness: 0.25, roughness: 0.55 });
   const pipe = new THREE.Mesh(outerGeometry, pipeMaterial);
   pipe.rotation.z = Math.PI / 2;
   assembly.add(pipe);
 
   const innerGeometry = new THREE.CylinderGeometry(innerRadius, innerRadius, modelLength, 96, 220, true);
-  const innerMaterial = createThermalPipeMaterial(THREE, innerGeometry, detections, modelLength, THREE.BackSide);
+  const innerMaterial = new THREE.MeshStandardMaterial({
+    color: 0xa6a6a6,
+    metalness: 0.25,
+    roughness: 0.55,
+    side: THREE.BackSide
+  });
   const innerWall = new THREE.Mesh(innerGeometry, innerMaterial);
   innerWall.rotation.z = Math.PI / 2;
   assembly.add(innerWall);
+  addSeverityPatches(THREE, assembly, detections, outerRadius, innerRadius, modelLength);
 
   const innerRimMaterial = new THREE.MeshStandardMaterial({ color: 0xa5b0aa, metalness: 0.88, roughness: 0.24, side: THREE.DoubleSide });
   [-modelLength / 2, modelLength / 2].forEach((x) => {
@@ -530,50 +535,47 @@ function initializeScene(containerId) {
   wireSceneControls(containerId, state);
 }
 
-function createThermalPipeMaterial(THREE, geometry, events, modelLength, side = THREE.FrontSide) {
-  const stops = [
-    { value: 0, color: new THREE.Color(0x102f8a) },
-    { value: 0.2, color: new THREE.Color(0x0878e8) },
-    { value: 0.4, color: new THREE.Color(0x00c5d8) },
-    { value: 0.58, color: new THREE.Color(0x24d36b) },
-    { value: 0.74, color: new THREE.Color(0xf2e900) },
-    { value: 0.88, color: new THREE.Color(0xff8100) },
-    { value: 1, color: new THREE.Color(0xe52521) }
-  ];
-  const positions = geometry.getAttribute("position");
-  const colors = new Float32Array(positions.count * 3);
-  const color = new THREE.Color();
-  const lengthSpread = 0.075;
-  const angleSpread = 0.24;
-  for (let index = 0; index < positions.count; index += 1) {
-    const longitudinalPosition = (positions.getY(index) + modelLength / 2) / modelLength;
-    const surfaceAngle = Math.atan2(positions.getZ(index), positions.getX(index));
-    let heat = 0.12;
-    events.forEach((event) => {
-      const eventPosition = event.position / PIPELINE_LENGTH_METERS;
-      const lengthDistance = longitudinalPosition - eventPosition;
-      const angleDistance = Math.atan2(
-        Math.sin(surfaceAngle - event.angle),
-        Math.cos(surfaceAngle - event.angle)
-      );
-      const heatDistance = (lengthDistance * lengthDistance) / (lengthSpread * lengthSpread) +
-        (angleDistance * angleDistance) / (angleSpread * angleSpread);
-      const influence = thermalSeverity[event.severity] * Math.exp(-0.5 * heatDistance);
-      heat = Math.max(heat, influence);
-    });
+function addSeverityPatches(THREE, assembly, events, outerRadius, innerRadius, modelLength) {
+  const severityColors = { Low: 0x00bf63, Medium: 0xffde59, High: 0xff3131 };
+  const lengthRadius = modelLength * 0.025;
+  const angleRadius = 0.2;
+  const segments = 48;
 
-    let stopIndex = stops.findIndex((stop) => stop.value >= heat);
-    if (stopIndex <= 0) {
-      color.copy(stops[0].color);
-    } else {
-      const lower = stops[stopIndex - 1];
-      const upper = stops[stopIndex];
-      color.copy(lower.color).lerp(upper.color, (heat - lower.value) / (upper.value - lower.value));
-    }
-    color.toArray(colors, index * 3);
-  }
-  geometry.setAttribute("color", new THREE.BufferAttribute(colors, 3));
-  return new THREE.MeshStandardMaterial({ vertexColors: true, metalness: 0.25, roughness: 0.55, side });
+  events.forEach((event) => {
+    const color = severityColors[event.severity];
+    if (color === undefined) return;
+
+    [outerRadius + 0.004, innerRadius - 0.004].forEach((radius) => {
+      const positions = [radius * Math.cos(event.angle), (event.position / PIPELINE_LENGTH_METERS - 0.5) * modelLength, radius * Math.sin(event.angle)];
+      const indices = [];
+
+      for (let segment = 0; segment < segments; segment += 1) {
+        const angle = (segment / segments) * Math.PI * 2;
+        const surfaceAngle = event.angle + Math.cos(angle) * angleRadius;
+        const longitudinalPosition =
+          (event.position / PIPELINE_LENGTH_METERS - 0.5) * modelLength +
+          Math.sin(angle) * lengthRadius;
+        positions.push(
+          radius * Math.cos(surfaceAngle),
+          longitudinalPosition,
+          radius * Math.sin(surfaceAngle)
+        );
+        indices.push(0, segment + 1, (segment + 1) % segments + 1);
+      }
+
+      const geometry = new THREE.BufferGeometry();
+      geometry.setAttribute("position", new THREE.Float32BufferAttribute(positions, 3));
+      geometry.setIndex(indices);
+      geometry.computeVertexNormals();
+
+      const patch = new THREE.Mesh(
+        geometry,
+        new THREE.MeshBasicMaterial({ color, side: THREE.DoubleSide })
+      );
+      patch.rotation.z = Math.PI / 2;
+      assembly.add(patch);
+    });
+  });
 }
 
 function showSceneFallback(container) {
