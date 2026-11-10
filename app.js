@@ -449,17 +449,18 @@ function initializeScene(containerId) {
   const modelLength = PIPELINE_LENGTH_METERS * PIPE_RENDER_SCALE;
   const innerRadius = PIPE_INNER_DIAMETER_METERS / 2 * PIPE_RENDER_SCALE;
   const outerRadius = innerRadius + PIPE_WALL_THICKNESS_METERS * PIPE_RENDER_SCALE;
+  const darkGraySrgb = 0x54 / 255;
+  const darkGrayLinear = ((darkGraySrgb + 0.055) / 1.055) ** 2.4;
+  const pipeColor = new THREE.Color().setRGB(darkGrayLinear, darkGrayLinear, darkGrayLinear);
   const outerGeometry = new THREE.CylinderGeometry(outerRadius, outerRadius, modelLength, 96, 220, true);
-  const pipeMaterial = new THREE.MeshStandardMaterial({ color: 0x545454, metalness: 0.25, roughness: 0.55 });
+  const pipeMaterial = new THREE.MeshBasicMaterial({ color: pipeColor });
   const pipe = new THREE.Mesh(outerGeometry, pipeMaterial);
   pipe.rotation.z = Math.PI / 2;
   assembly.add(pipe);
 
   const innerGeometry = new THREE.CylinderGeometry(innerRadius, innerRadius, modelLength, 96, 220, true);
-  const innerMaterial = new THREE.MeshStandardMaterial({
-    color: 0x545454,
-    metalness: 0.25,
-    roughness: 0.55,
+  const innerMaterial = new THREE.MeshBasicMaterial({
+    color: pipeColor,
     side: THREE.BackSide
   });
   const innerWall = new THREE.Mesh(innerGeometry, innerMaterial);
@@ -604,11 +605,11 @@ function addSeverityPatches(THREE, assembly, events, outerRadius, innerRadius, m
       depthWrite: false
     }));
     label.position.set(
+      -eventLength,
       (outerRadius + 0.02) * Math.cos(event.angle),
-      eventLength,
       (outerRadius + 0.02) * Math.sin(event.angle)
     );
-    label.scale.set(0.17, 0.17, 1);
+    label.scale.set(0.22, 0.22, 1);
     assembly.add(label);
   });
 }
