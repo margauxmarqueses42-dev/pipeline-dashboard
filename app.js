@@ -450,16 +450,14 @@ function initializeScene(containerId) {
   const innerRadius = PIPE_INNER_DIAMETER_METERS / 2 * PIPE_RENDER_SCALE;
   const outerRadius = innerRadius + PIPE_WALL_THICKNESS_METERS * PIPE_RENDER_SCALE;
   const outerGeometry = new THREE.CylinderGeometry(outerRadius, outerRadius, modelLength, 96, 220, true);
-  const pipeMaterial = new THREE.MeshStandardMaterial({ color: 0x545454, metalness: 0.25, roughness: 0.55 });
+  const pipeMaterial = new THREE.MeshBasicMaterial({ color: 0x545454 });
   const pipe = new THREE.Mesh(outerGeometry, pipeMaterial);
   pipe.rotation.z = Math.PI / 2;
   assembly.add(pipe);
 
   const innerGeometry = new THREE.CylinderGeometry(innerRadius, innerRadius, modelLength, 96, 220, true);
-  const innerMaterial = new THREE.MeshStandardMaterial({
+  const innerMaterial = new THREE.MeshBasicMaterial({
     color: 0x545454,
-    metalness: 0.25,
-    roughness: 0.55,
     side: THREE.BackSide
   });
   const innerWall = new THREE.Mesh(innerGeometry, innerMaterial);
