@@ -466,6 +466,7 @@ function initializeScene(containerId) {
   const innerWall = new THREE.Mesh(innerGeometry, innerMaterial);
   innerWall.rotation.z = Math.PI / 2;
   assembly.add(innerWall);
+  addPipeSeverityBands(THREE, assembly, detections, innerRadius, outerRadius, modelLength);
   addPipeSurfaceMarkers(THREE, assembly, detections, outerRadius, modelLength);
 
   const innerRimMaterial = new THREE.MeshStandardMaterial({ color: 0xa5b0aa, metalness: 0.88, roughness: 0.24, side: THREE.DoubleSide });
@@ -534,6 +535,34 @@ function initializeScene(containerId) {
   const fallback = container.parentElement.querySelector(".pipeline-loading");
   if (fallback) fallback.style.display = "none";
   wireSceneControls(containerId, state);
+}
+
+function addPipeSeverityBands(THREE, assembly, events, innerRadius, outerRadius, modelLength) {
+  const severityColors = { Low: 0x00bf63, Medium: 0xffde59, High: 0xff3131 };
+  const bandWidth = modelLength * 0.035;
+  const bandMaterials = new Map();
+
+  events.forEach((event) => {
+    const color = severityColors[event.severity];
+    if (!color) return;
+
+    let material = bandMaterials.get(color);
+    if (!material) {
+      material = new THREE.MeshBasicMaterial({ color, side: THREE.DoubleSide });
+      bandMaterials.set(color, material);
+    }
+
+    const eventLength = (0.5 - event.position / PIPELINE_LENGTH_METERS) * modelLength;
+    [outerRadius + 0.001, innerRadius - 0.001].forEach((radius) => {
+      const band = new THREE.Mesh(
+        new THREE.CylinderGeometry(radius, radius, bandWidth, 96, 1, true),
+        material
+      );
+      band.rotation.z = Math.PI / 2;
+      band.position.x = -eventLength;
+      assembly.add(band);
+    });
+  });
 }
 
 function addPipeSurfaceMarkers(THREE, assembly, events, outerRadius, modelLength) {
