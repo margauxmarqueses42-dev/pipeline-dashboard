@@ -537,16 +537,16 @@ function initializeScene(containerId) {
 }
 
 function addPipeSurfaceMarkers(THREE, assembly, events, outerRadius, modelLength) {
-  const typeColors = { U: "#ffde59", P: "#ff3131", G: "#00bf63" };
+  const severityColors = { Low: "#00bf63", Medium: "#ffde59", High: "#ff3131" };
   const longitudinalRadius = modelLength * 0.022;
   const angleRadius = 0.18;
   const segments = 48;
 
   events.forEach((event) => {
-    const color = typeColors[event.type];
+    const color = severityColors[event.severity];
     if (!color) return;
 
-    const eventLength = (event.position / PIPELINE_LENGTH_METERS - 0.5) * modelLength;
+    const eventLength = (0.5 - event.position / PIPELINE_LENGTH_METERS) * modelLength;
     const positions = [outerRadius * Math.cos(event.angle), eventLength, outerRadius * Math.sin(event.angle)];
     const uvs = [0.5, 0.5];
     const indices = [];
