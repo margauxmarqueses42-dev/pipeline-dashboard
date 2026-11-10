@@ -449,7 +449,7 @@ function initializeScene(containerId) {
   const modelLength = PIPELINE_LENGTH_METERS * PIPE_RENDER_SCALE;
   const innerRadius = PIPE_INNER_DIAMETER_METERS / 2 * PIPE_RENDER_SCALE;
   const outerRadius = innerRadius + PIPE_WALL_THICKNESS_METERS * PIPE_RENDER_SCALE;
-  const darkGraySrgb = 0x54 / 255;
+  const darkGraySrgb = 0x73 / 255;
   const darkGrayLinear = ((darkGraySrgb + 0.055) / 1.055) ** 2.4;
   const pipeColor = new THREE.Color().setRGB(darkGrayLinear, darkGrayLinear, darkGrayLinear);
   const outerGeometry = new THREE.CylinderGeometry(outerRadius, outerRadius, modelLength, 96, 220, true);
@@ -466,7 +466,7 @@ function initializeScene(containerId) {
   const innerWall = new THREE.Mesh(innerGeometry, innerMaterial);
   innerWall.rotation.z = Math.PI / 2;
   assembly.add(innerWall);
-  addSeverityPatches(THREE, assembly, detections, outerRadius, innerRadius, modelLength);
+  addPipeSurfaceMarkers(THREE, assembly, detections, outerRadius, modelLength);
 
   const innerRimMaterial = new THREE.MeshStandardMaterial({ color: 0xa5b0aa, metalness: 0.88, roughness: 0.24, side: THREE.DoubleSide });
   [-modelLength / 2, modelLength / 2].forEach((x) => {
@@ -536,81 +536,71 @@ function initializeScene(containerId) {
   wireSceneControls(containerId, state);
 }
 
-function addSeverityPatches(THREE, assembly, events, outerRadius, innerRadius, modelLength) {
-  const severityColors = { Low: 0x00bf63, Medium: 0xffde59, High: 0xff3131 };
-  const lengthRadius = modelLength * 0.02;
+function addPipeSurfaceMarkers(THREE, assembly, events, outerRadius, modelLength) {
+  const typeColors = { U: "#ffde59", P: "#ff3131", G: "#00bf63" };
+  const longitudinalRadius = modelLength * 0.022;
   const angleRadius = 0.18;
   const segments = 48;
 
   events.forEach((event) => {
-    const color = severityColors[event.severity];
-    if (color === undefined) return;
+    const color = typeColors[event.type];
+    if (!color) return;
 
     const eventLength = (event.position / PIPELINE_LENGTH_METERS - 0.5) * modelLength;
-    [outerRadius + 0.01, innerRadius - 0.01].forEach((radius) => {
-      const positions = [radius * Math.cos(event.angle), eventLength, radius * Math.sin(event.angle)];
-      const indices = [];
+    const positions = [outerRadius * Math.cos(event.angle), eventLength, outerRadius * Math.sin(event.angle)];
+    const uvs = [0.5, 0.5];
+    const indices = [];
 
-      for (let segment = 0; segment < segments; segment += 1) {
-        const angle = (segment / segments) * Math.PI * 2;
-        const surfaceAngle = event.angle + Math.cos(angle) * angleRadius;
-        const longitudinalPosition = eventLength + Math.sin(angle) * lengthRadius;
-        positions.push(
-          radius * Math.cos(surfaceAngle),
-          longitudinalPosition,
-          radius * Math.sin(surfaceAngle)
-        );
-        indices.push(0, segment + 1, (segment + 1) % segments + 1);
-      }
-
-      const geometry = new THREE.BufferGeometry();
-      geometry.setAttribute("position", new THREE.Float32BufferAttribute(positions, 3));
-      geometry.setIndex(indices);
-      geometry.computeVertexNormals();
-
-      const patch = new THREE.Mesh(
-        geometry,
-        new THREE.MeshBasicMaterial({
-          color,
-          side: THREE.DoubleSide,
-          polygonOffset: true,
-          polygonOffsetFactor: -1,
-          polygonOffsetUnits: -1
-        })
+    for (let segment = 0; segment < segments; segment += 1) {
+      const angle = (segment / segments) * Math.PI * 2;
+      const surfaceAngle = event.angle + Math.cos(angle) * angleRadius;
+      const longitudinalPosition = eventLength + Math.sin(angle) * longitudinalRadius;
+      positions.push(
+        (outerRadius + 0.006) * Math.cos(surfaceAngle),
+        longitudinalPosition,
+        (outerRadius + 0.006) * Math.sin(surfaceAngle)
       );
-      patch.rotation.z = Math.PI / 2;
-      assembly.add(patch);
-    });
+      uvs.push(0.5 + 0.5 * Math.sin(angle), 0.5 + 0.5 * Math.cos(angle));
+      indices.push(0, segment + 1, (segment + 1) % segments + 1);
+    }
+
+    const geometry = new THREE.BufferGeometry();
+    geometry.setAttribute("position", new THREE.Float32BufferAttribute(positions, 3));
+    geometry.setAttribute("uv", new THREE.Float32BufferAttribute(uvs, 2));
+    geometry.setIndex(indices);
+    geometry.computeVertexNormals();
 
     const canvas = document.createElement("canvas");
-    canvas.width = 128;
+    canvas.width = 256;
     canvas.height = 128;
     const context = canvas.getContext("2d");
     if (!context) throw new Error("Could not draw a label for the 3D pipeline.");
-    context.font = "bold 88px Arial, sans-serif";
+    context.fillStyle = color;
+    context.beginPath();
+    context.ellipse(128, 64, 120, 56, 0, 0, Math.PI * 2);
+    context.fill();
+    context.font = "bold 92px Arial, sans-serif";
     context.textAlign = "center";
     context.textBaseline = "middle";
     context.lineJoin = "round";
-    context.lineWidth = 12;
-    context.strokeStyle = "#252525";
-    context.fillStyle = "#ffffff";
-    context.strokeText(event.type, 64, 66);
-    context.fillText(event.type, 64, 66);
+    context.lineWidth = 8;
+    context.strokeStyle = "#ffffff";
+    context.fillStyle = "#17231e";
+    context.save();
+    context.translate(128, 64);
+    context.rotate(Math.PI);
+    context.strokeText(event.type, 0, 3);
+    context.fillText(event.type, 0, 3);
+    context.restore();
 
     const texture = new THREE.CanvasTexture(canvas);
     texture.encoding = THREE.sRGBEncoding;
-    const label = new THREE.Sprite(new THREE.SpriteMaterial({
-      map: texture,
-      transparent: true,
-      depthWrite: false
-    }));
-    label.position.set(
-      -eventLength,
-      (outerRadius + 0.02) * Math.cos(event.angle),
-      (outerRadius + 0.02) * Math.sin(event.angle)
+    const marker = new THREE.Mesh(
+      geometry,
+      new THREE.MeshBasicMaterial({ map: texture, side: THREE.DoubleSide })
     );
-    label.scale.set(0.22, 0.22, 1);
-    assembly.add(label);
+    marker.rotation.z = Math.PI / 2;
+    assembly.add(marker);
   });
 }
 
