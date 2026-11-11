@@ -55,8 +55,8 @@
       <div class="nav-label">INSPECTION</div>
       <nav class="main-nav" aria-label="Main navigation">
         <button class="nav-item active" data-view="scan-data"><span class="nav-icon">◷</span> Scan data <span class="nav-count">01</span></button>
-        <button class="nav-item" data-view="pipeline"><span class="nav-icon">◎</span> Pipeline map</button>
         <button class="nav-item" data-view="history"><span class="nav-icon">≡</span> Detection log <span class="nav-badge">8</span></button>
+        <button class="nav-item" data-view="pipeline"><span class="nav-icon">◎</span> Pipeline map</button>
         <button class="nav-item" data-view="reports"><span class="nav-icon">▤</span> Reports</button>
       </nav>
       <div class="nav-label nav-label-spaced">SYSTEM</div>
@@ -98,10 +98,10 @@
           </div>
           <div class="section-title-row"><div><h2>Sensor readings by inspection point</h2><p>Readings are shown in collection order from start to end of the pipe.</p></div><span class="sample-tag">SAMPLE UPLOAD DATA</span></div>
           <div class="scan-import-actions">
-            <label class="button button-outline scan-file-label" for="scanCsvInput">Import CSV and checkpoint images</label>
+            <label class="button button-outline scan-file-label" for="scanCsvInput">Upload CSV file</label>
             <input id="scanCsvInput" class="scan-file-input" type="file" accept=".csv,text/csv,image/*" multiple>
             <button class="button button-outline" id="exportReadingsCsv" type="button">Export readings CSV</button>
-            <p id="scanImportStatus" class="scan-import-status" role="status" aria-live="polite">CSV rows can include an <code>image_file</code> column such as <code>images/cp012.jpg</code>. Select the CSV and its checkpoint photos together to preview them.</p>
+            <p id="scanImportStatus" class="scan-import-status" role="status" aria-live="polite">Choose a sensor CSV to replace the sample readings. Required columns: electrochemical, pH, and temperature. Checkpoint photos are optional; include them with the CSV to preview images.</p>
           </div>
           <div class="table-card scan-readings-card"><div class="table-toolbar"><div class="table-title"><span class="uploaded-indicator"><i></i> <span id="scanPointCount">8 INSPECTION POINTS</span></span><span class="table-total">Oldest to newest</span></div></div><div class="table-scroll"><table><thead><tr><th>POINT</th><th>POSITION</th><th>RECORDED AT</th><th>ELECTROCHEMICAL</th><th>pH</th><th>TEMPERATURE</th><th>CAMERA IMAGE</th></tr></thead><tbody id="scanReadingRows"></tbody></table></div><div class="table-foot"><span id="scanReadingCount">Showing <strong>8</strong> sample readings</span></div></div>
         </section>
