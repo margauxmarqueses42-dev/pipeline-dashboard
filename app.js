@@ -427,7 +427,7 @@ function initializeScene(containerId) {
   }
 
   const scene = new THREE.Scene();
-  const camera = new THREE.PerspectiveCamera(33, 1, 0.1, 100);
+  const camera = new THREE.PerspectiveCamera(33, 1, 0.01, 100);
   camera.position.set(0.7, 3.25, 8.8);
   camera.lookAt(0, 0, 0);
   renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
@@ -490,7 +490,16 @@ function initializeScene(containerId) {
   grid.material.opacity = 0.25;
   scene.add(grid);
 
-  const state = { renderer, scene, camera, assembly, drag: false, lastX: 0, lastY: 0, zoom: 1 };
+  const state = {
+    renderer,
+    scene,
+    camera,
+    assembly,
+    target: new THREE.Vector3(0, 0, 0),
+    drag: false,
+    lastX: 0,
+    lastY: 0
+  };
   activeScenes.set(containerId, state);
 
   function resize() {
@@ -520,11 +529,19 @@ function initializeScene(containerId) {
   });
   renderer.domElement.addEventListener("pointerup", () => { state.drag = false; });
   renderer.domElement.addEventListener("pointercancel", () => { state.drag = false; });
+  const raycaster = new THREE.Raycaster();
   renderer.domElement.addEventListener("wheel", (event) => {
     event.preventDefault();
-    state.zoom = Math.max(0.72, Math.min(1.45, state.zoom - Math.sign(event.deltaY) * 0.07));
-    camera.position.set(0.7 * state.zoom, 3.25 * state.zoom, 8.8 * state.zoom);
-    camera.lookAt(0, 0, 0);
+    const bounds = renderer.domElement.getBoundingClientRect();
+    const pointer = new THREE.Vector2(
+      ((event.clientX - bounds.left) / bounds.width) * 2 - 1,
+      -((event.clientY - bounds.top) / bounds.height) * 2 + 1
+    );
+    raycaster.setFromCamera(pointer, camera);
+    const intersections = raycaster.intersectObjects(assembly.children, true);
+    const focusPoint = intersections.length ? intersections[0].point : state.target;
+    const wheelDelta = Math.max(-0.5, Math.min(0.5, event.deltaY * 0.001));
+    zoomCamera(state, Math.exp(wheelDelta), focusPoint);
   }, { passive: false });
 
   function render() {
@@ -600,23 +617,19 @@ function addPipeSurfaceMarkers(THREE, assembly, events, outerRadius, modelLength
     geometry.computeVertexNormals();
 
     const canvas = document.createElement("canvas");
-    canvas.width = 256;
-    canvas.height = 128;
+    canvas.width = 512;
+    canvas.height = 256;
     const context = canvas.getContext("2d");
     if (!context) throw new Error("Could not draw a label for the 3D pipeline.");
-    context.fillStyle = color;
-    context.beginPath();
-    context.ellipse(128, 64, 120, 56, 0, 0, Math.PI * 2);
-    context.fill();
-    context.font = "bold 92px Arial, sans-serif";
+    context.font = "900 200px Arial Black, Arial, sans-serif";
     context.textAlign = "center";
     context.textBaseline = "middle";
     context.lineJoin = "round";
-    context.lineWidth = 8;
-    context.strokeStyle = "#ffffff";
-    context.fillStyle = "#17231e";
+    context.lineWidth = 20;
+    context.strokeStyle = "#102017";
+    context.fillStyle = "#ffffff";
     context.save();
-    context.translate(128, 64);
+    context.translate(256, 128);
     context.rotate(Math.PI);
     context.strokeText(event.type, 0, 3);
     context.fillText(event.type, 0, 3);
@@ -626,7 +639,12 @@ function addPipeSurfaceMarkers(THREE, assembly, events, outerRadius, modelLength
     texture.encoding = THREE.sRGBEncoding;
     const marker = new THREE.Mesh(
       geometry,
-      new THREE.MeshBasicMaterial({ map: texture, side: THREE.DoubleSide })
+      new THREE.MeshBasicMaterial({
+        map: texture,
+        side: THREE.DoubleSide,
+        transparent: true,
+        depthWrite: false
+      })
     );
     marker.rotation.z = Math.PI / 2;
     assembly.add(marker);
@@ -655,9 +673,9 @@ function wireSceneControls(containerId, state) {
       const target = activeScenes.get(sceneId);
       if (!target) return;
       target.assembly.rotation.set(0, 0, 0);
-      target.zoom = 1;
+      target.target.set(0, 0, 0);
       target.camera.position.set(0.7, 3.25, 8.8);
-      target.camera.lookAt(0, 0, 0);
+      target.camera.lookAt(target.target);
     });
   });
   if (containerId === "pipeline3d") {
@@ -667,9 +685,17 @@ function wireSceneControls(containerId, state) {
 }
 
 function adjustZoom(state, direction) {
-  state.zoom = Math.max(0.72, Math.min(1.45, state.zoom + direction * 0.08));
-  state.camera.position.set(0.7 * state.zoom, 3.25 * state.zoom, 8.8 * state.zoom);
-  state.camera.lookAt(0, 0, 0);
+  zoomCamera(state, Math.exp(direction * 0.18));
+}
+
+function zoomCamera(state, factor, focusPoint = state.target) {
+  const offset = state.camera.position.clone().sub(state.target);
+  const distance = offset.length();
+  const nextDistance = Math.max(0.35, Math.min(30, distance * factor));
+  state.target.lerp(focusPoint, 1 - nextDistance / distance);
+  offset.setLength(nextDistance);
+  state.camera.position.copy(state.target).add(offset);
+  state.camera.lookAt(state.target);
 }
 
 function renderDetectionRows(filter = "") {
