@@ -496,6 +496,8 @@ function initializeScene(containerId) {
     camera,
     assembly,
     target: new THREE.Vector3(0, 0, 0),
+    zoomFocus: new THREE.Vector3(0, 0, 0),
+    zoomVelocity: 0,
     drag: false,
     lastX: 0,
     lastY: 0
@@ -539,13 +541,23 @@ function initializeScene(containerId) {
     );
     raycaster.setFromCamera(pointer, camera);
     const intersections = raycaster.intersectObjects(assembly.children, true);
-    const focusPoint = intersections.length ? intersections[0].point : state.target;
-    const wheelDelta = Math.max(-0.5, Math.min(0.5, event.deltaY * 0.001));
-    zoomCamera(state, Math.exp(wheelDelta), focusPoint);
+    if (intersections.length) state.zoomFocus.copy(intersections[0].point);
+    else state.zoomFocus.copy(state.target);
+    const deltaScale = event.deltaMode === 1 ? 16 : event.deltaMode === 2 ? bounds.height : 1;
+    const wheelDelta = Math.max(-180, Math.min(180, event.deltaY * deltaScale));
+    state.zoomVelocity = Math.max(-0.45, Math.min(0.45, state.zoomVelocity + wheelDelta * 0.0007));
   }, { passive: false });
 
   function render() {
-    if (container.isConnected) renderer.render(scene, camera);
+    if (container.isConnected) {
+      if (Math.abs(state.zoomVelocity) > 0.001) {
+        zoomCamera(state, Math.exp(state.zoomVelocity), state.zoomFocus);
+        state.zoomVelocity *= 0.72;
+      } else {
+        state.zoomVelocity = 0;
+      }
+      renderer.render(scene, camera);
+    }
     requestAnimationFrame(render);
   }
   render();
@@ -577,6 +589,7 @@ function addPipeSeverityBands(THREE, assembly, events, innerRadius, outerRadius,
       );
       band.rotation.z = Math.PI / 2;
       band.position.x = -eventLength;
+      band.renderOrder = 1;
       assembly.add(band);
     });
   });
@@ -593,7 +606,8 @@ function addPipeSurfaceMarkers(THREE, assembly, events, outerRadius, modelLength
     if (!color) return;
 
     const eventLength = (0.5 - event.position / PIPELINE_LENGTH_METERS) * modelLength;
-    const positions = [outerRadius * Math.cos(event.angle), eventLength, outerRadius * Math.sin(event.angle)];
+    const markerRadius = outerRadius + 0.025;
+    const positions = [markerRadius * Math.cos(event.angle), eventLength, markerRadius * Math.sin(event.angle)];
     const uvs = [0.5, 0.5];
     const indices = [];
 
@@ -602,9 +616,9 @@ function addPipeSurfaceMarkers(THREE, assembly, events, outerRadius, modelLength
       const surfaceAngle = event.angle + Math.cos(angle) * angleRadius;
       const longitudinalPosition = eventLength + Math.sin(angle) * longitudinalRadius;
       positions.push(
-        (outerRadius + 0.006) * Math.cos(surfaceAngle),
+        markerRadius * Math.cos(surfaceAngle),
         longitudinalPosition,
-        (outerRadius + 0.006) * Math.sin(surfaceAngle)
+        markerRadius * Math.sin(surfaceAngle)
       );
       uvs.push(0.5 + 0.5 * Math.sin(angle), 0.5 + 0.5 * Math.cos(angle));
       indices.push(0, segment + 1, (segment + 1) % segments + 1);
@@ -643,10 +657,14 @@ function addPipeSurfaceMarkers(THREE, assembly, events, outerRadius, modelLength
         map: texture,
         side: THREE.DoubleSide,
         transparent: true,
-        depthWrite: false
+        depthWrite: false,
+        polygonOffset: true,
+        polygonOffsetFactor: -1,
+        polygonOffsetUnits: -1
       })
     );
     marker.rotation.z = Math.PI / 2;
+    marker.renderOrder = 2;
     assembly.add(marker);
   });
 }
@@ -674,6 +692,8 @@ function wireSceneControls(containerId, state) {
       if (!target) return;
       target.assembly.rotation.set(0, 0, 0);
       target.target.set(0, 0, 0);
+      target.zoomFocus.copy(target.target);
+      target.zoomVelocity = 0;
       target.camera.position.set(0.7, 3.25, 8.8);
       target.camera.lookAt(target.target);
     });
